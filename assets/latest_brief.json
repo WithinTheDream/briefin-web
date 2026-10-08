@@ -1,0 +1,76 @@
+{
+  "date": "2026-10-08",
+  "normalized": {
+    "ihsg": {
+      "price": 7521.3,
+      "change": 32.5,
+      "percent_change": 0.43
+    },
+    "market_cap": 12450000000000000,
+    "gainers": [
+      {
+        "symbol": "BBCA",
+        "price": 10625,
+        "percent_change": 1.67
+      },
+      {
+        "symbol": "TLKM",
+        "price": 3780,
+        "percent_change": 1.89
+      },
+      {
+        "symbol": "BRPT",
+        "price": 1180,
+        "percent_change": 4.42
+      },
+      {
+        "symbol": "MEDC",
+        "price": 1340,
+        "percent_change": 3.47
+      },
+      {
+        "symbol": "AMMN",
+        "price": 9850,
+        "percent_change": 2.6
+      }
+    ],
+    "losers": [
+      {
+        "symbol": "GOTO",
+        "price": 62,
+        "percent_change": -3.12
+      },
+      {
+        "symbol": "ADRO",
+        "price": 2950,
+        "percent_change": -1.67
+      },
+      {
+        "symbol": "ASII",
+        "price": 4890,
+        "percent_change": -1.21
+      },
+      {
+        "symbol": "UNVR",
+        "price": 2140,
+        "percent_change": -2.28
+      },
+      {
+        "symbol": "BUMI",
+        "price": 138,
+        "percent_change": -2.82
+      }
+    ]
+  },
+  "summary": {
+    "ihsg": "\ud83d\ude80 *Morning traders & investors! Mari intip peta kekuatan bursa hari ini.*\n\nOptimisme pasar kembali terlihat mendorong penguatan indeks didukung aksi akumulasi selektif.\n\n**IHSG:** 7,521.30 (+32.50 / +0.43%) \ud83d\udcc8",
+    "gainers": "\ud83d\ude80 **Top Gainers Highlight:**\nBeberapa saham mencatatkan penguatan signifikan hari ini yang patut dicermati momentumnya.",
+    "losers": "\ud83d\udd3b **Top Losers Highlight:**\nAda beberapa saham yang mengalami tekanan jual cukup berat, tetap waspada jika berada di bawah support.",
+    "sektor": "\ud83d\udcca **Performa Sektoral IDX:**\nSektor Energi dan Teknologi memimpin reli penguatan indeks, sementara sektor Bahan Baku mengalami konsolidasi wajar.",
+    "asing": "\ud83c\udf10 **Arus Dana Asing (Foreign Flow):**\nInvestor asing mencatatkan akumulasi Net Buy selektif di saham-saham perbankan *big caps* pada pasar reguler.",
+    "makro": "\ud83c\udf0d **Komoditas & Makro Global:**\nHarga minyak mentah stabil dengan penguatan pada emas global. Nilai tukar Rupiah (USD/IDR) bergerak stabil di rentang defensif.",
+    "ipo": "\ud83d\udcc5 **Aksi Korporasi & IPO:**\nPerhatikan tanggal cum date dividen beberapa emiten pekan ini serta jadwal penawaran umum perdana di e-IPO.",
+    "watchlist": "\ud83c\udfaf **Technical Watchlist:**\n\u2022 **BBRI**: Menguji area resistance 5,100 dengan potensi kelanjutan tren.\n\u2022 **MEDC**: Katalis penguatan harga energi global.\n\u2022 **ASII**: Menjaga area support kuat 4,800.",
+    "berita": "\ud83d\udca1 *Tips Hari Ini:* Hindari FOMO pada saham dengan volatilitas tinggi, utamakan manajemen risiko modal."
+  }
+}

@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Today's Market Brief — Briefin Portal Harian</title>
+  <meta name="description" content="Baca ringkasan data pasar saham harian IHSG, 9 topik pergerakan sektoral, dan akses kartu infografis visual sebelum jam bursa dibuka." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Supabase JS Client -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Space Grotesk', 'sans-serif'],
+            mono: ['Space Mono', 'monospace'],
+          },
+          colors: {
+            ink: '#0A0A0A',
+            surface: '#FFFFFF',
+            offwhite: '#F8F9FA',
+            muted: '#6B7280',
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    * { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Space Grotesk', sans-serif; background: #FFFFFF; color: #0A0A0A; overflow-x: hidden; }
+
+    /* --- TICKER --- */
+    .ticker-wrapper { overflow: hidden; white-space: nowrap; background: #0A0A0A; }
+    .ticker-track { display: inline-flex; animation: ticker-scroll 30s linear infinite; }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes ticker-scroll { 0%{ transform:translateX(0); } 100%{ transform:translateX(-50%); } }
+
+    /* --- BRUTAL BUTTON --- */
+    .btn-brutal {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .7rem 1.4rem;
+      background: #0A0A0A; color: #fff;
+      border: 2px solid #0A0A0A;
+      font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: .875rem; letter-spacing: .02em;
+      box-shadow: 4px 4px 0 0 #0A0A0A;
+      cursor: pointer; transition: all .12s ease; text-decoration: none; user-select: none;
+    }
+    .btn-brutal:hover  { transform: translate(2px,2px); box-shadow: 2px 2px 0 0 #0A0A0A; }
+    .btn-brutal:active { transform: translate(4px,4px); box-shadow: 0 0 0 0 #0A0A0A; }
+    .btn-brutal-outline { background:#fff; color:#0A0A0A; }
+    .btn-brutal-outline:hover { background:#0A0A0A; color:#fff; }
+
+    /* --- CARD --- */
+    .card-brutal { border:2px solid #0A0A0A; box-shadow:4px 4px 0 0 #0A0A0A; transition:all .12s ease; background:#fff; }
+    .card-brutal:hover { transform:translate(2px,2px); box-shadow:2px 2px 0 0 #0A0A0A; }
+
+    /* --- PILLS --- */
+    .today-pill {
+      padding: .45rem .85rem; border: 2px solid #0A0A0A;
+      font-family: 'Space Mono', monospace; font-size: .8rem; font-weight: 700;
+      background: #FFFFFF; color: #0A0A0A; cursor: pointer; transition: all .12s ease;
+      box-shadow: 2px 2px 0 0 #0A0A0A;
+    }
+    .today-pill:hover { transform: translate(1px, 1px); box-shadow: 1px 1px 0 0 #0A0A0A; background: #F3F4F6; }
+    .today-pill.active { background: #0A0A0A; color: #FFFFFF; transform: translate(2px, 2px); box-shadow: 0 0 0 0 #0A0A0A; }
+
+    /* --- BADGE --- */
+    .badge-brutal { display:inline-block; border:2px solid #0A0A0A; font-family:'Space Mono',monospace; font-size:.7rem; font-weight:700; padding:.25rem .75rem; letter-spacing:.06em; }
+
+    /* --- STATUS DOT --- */
+    .status-dot { width:8px; height:8px; border-radius:50%; background:#22c55e; animation:pulse-dot 2s ease-in-out infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+    .section-divider { border-top:2px solid #0A0A0A; }
+  </style>
+</head>
+
+<body class="bg-white text-ink">
+
+<!-- TICKER -->
+<div class="ticker-wrapper py-2 relative z-50">
+  <div class="ticker-track">
+    <span class="ticker-item font-mono text-xs text-white px-8 tracking-widest uppercase">MARKET PRE-OPEN IN 08:45 WIB</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="font-mono text-xs text-white px-8 tracking-widest uppercase">TODAY'S MARKET BRIEF PORTAL</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="font-mono text-xs text-white px-8 tracking-widest uppercase">LIVE IDX DATA INTELLIGENCE</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="font-mono text-xs text-white px-8 tracking-widest uppercase">IHSG &#8226; 9 TOPIK SEKTOR &#8226; 3 INFOGRAFIS</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="ticker-item font-mono text-xs text-white px-8 tracking-widest uppercase">MARKET PRE-OPEN IN 08:45 WIB</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="font-mono text-xs text-white px-8 tracking-widest uppercase">TODAY'S MARKET BRIEF PORTAL</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="font-mono text-xs text-white px-8 tracking-widest uppercase">LIVE IDX DATA INTELLIGENCE</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+    <span class="font-mono text-xs text-white px-8 tracking-widest uppercase">IHSG &#8226; 9 TOPIK SEKTOR &#8226; 3 INFOGRAFIS</span>
+    <span class="text-gray-500 px-2">&#8226;</span>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar" class="sticky top-0 z-40 bg-white border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between h-16">
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center" style="text-decoration:none;">
+          <span class="text-2xl font-bold tracking-tight text-ink leading-none">briefin</span>
+          <span class="text-2xl font-black text-ink leading-none">.</span>
+        </a>
+        <span class="font-mono text-xs bg-gray-100 border border-ink px-2 py-0.5 font-bold uppercase">
+          Today's Brief
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <button onclick="refreshTodaysBrief()" class="btn-brutal btn-brutal-outline text-xs py-2 px-3">
+          <i class="fa-solid fa-arrows-rotate text-xs"></i> Refresh
+        </button>
+        <button onclick="copyBriefText()" class="btn-brutal text-xs py-2 px-3.5" id="btn-copy-brief">
+          <i class="fa-regular fa-copy text-xs"></i> Salin Brief
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- HEADER / STATUS -->
+<header class="bg-gray-50 py-10 px-4 sm:px-6 lg:px-8 border-b-2 border-ink">
+  <div class="max-w-6xl mx-auto">
+    <!-- Breadcrumb / Kembali ke Beranda -->
+    <div class="mb-4">
+      <a href="index.html" class="inline-flex items-center gap-2 font-mono text-xs font-bold text-ink bg-white border-2 border-ink px-3 py-1.5 shadow-[2px_2px_0_0_#0A0A0A] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-none transition-all">
+        <i class="fa-solid fa-arrow-left text-xs"></i> Kembali ke Beranda
+      </a>
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="badge-brutal">[ PORTAL HARIAN — LIVE BRIEF ]</span>
+          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 border-2 border-ink font-mono text-[11px] font-bold text-green-900">
+            <span class="w-2 h-2 rounded-full bg-green-600 animate-ping"></span> Live Market Intel
+          </span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl font-bold tracking-tight">
+          Today's Market Brief.
+        </h1>
+        <p class="text-muted text-base mt-2 max-w-xl">
+          Eksplorasi ringkasan data pasar bursa hari ini dengan tampilan yang jernih dan terstruktur sebelum sesi perdagangan dimulai.
+        </p>
+      </div>
+
+      <div class="flex flex-col items-start md:items-end gap-1">
+        <span id="brief-date-badge" class="font-mono text-xs font-bold bg-white border-2 border-ink px-3 py-1 shadow-[2px_2px_0_0_#0A0A0A]">
+          📅 Sesi: Hari ini
+        </span>
+        <span class="font-mono text-[11px] text-muted">Diperbarui otomatis setiap pagi 06:30 WIB</span>
+      </div>
+    </div>
+
+    <!-- Live Market Snapshot Cards -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-0 border-2 border-ink mt-8 bg-white shadow-[4px_4px_0_0_#0A0A0A]">
+      <!-- IHSG Level -->
+      <div class="p-5 border-b-2 sm:border-b-0 border-r-2 border-ink bg-gray-50">
+        <span class="font-mono text-xs uppercase tracking-wider text-muted block mb-1">IHSG Composite</span>
+        <div class="flex items-baseline gap-2">
+          <span id="market-ihsg-price" class="font-mono text-2xl sm:text-3xl font-bold text-ink">7,521.30</span>
+        </div>
+        <span id="market-ihsg-badge" class="inline-block mt-2 font-mono text-xs font-bold text-green-700 bg-green-100 border border-green-600 px-2 py-0.5">
+          ▲ +32.50 (+0.43%)
+        </span>
+      </div>
+
+      <!-- Market Cap -->
+      <div class="p-5 border-b-2 sm:border-b-0 lg:border-r-2 border-ink bg-white">
+        <span class="font-mono text-xs uppercase tracking-wider text-muted block mb-1">Total Market Cap</span>
+        <span id="market-cap-val" class="font-mono text-2xl sm:text-3xl font-bold text-ink">Rp 12,450 T</span>
+        <p class="font-mono text-[11px] text-muted mt-2">Bursa Efek Indonesia (IDX)</p>
+      </div>
+
+      <!-- Top Gainers Quick -->
+      <div class="p-5 border-b-2 lg:border-b-0 border-r-2 border-ink bg-gray-50">
+        <span class="font-mono text-xs uppercase tracking-wider text-muted block mb-1">Top Gainer Pilihan</span>
+        <div class="flex items-baseline justify-between">
+          <span id="quick-gainer-sym" class="font-bold text-xl sm:text-2xl text-ink">BBCA</span>
+          <span id="quick-gainer-pct" class="font-mono text-xs font-bold text-green-700 bg-green-100 px-1.5 py-0.5">+1.67%</span>
+        </div>
+        <p id="quick-gainer-price" class="font-mono text-xs text-muted mt-2">Rp 10,625 / lembar</p>
+      </div>
+
+      <!-- Broadcast Status -->
+      <div class="p-5 bg-white">
+        <span class="font-mono text-xs uppercase tracking-wider text-muted block mb-1">Status Pengiriman</span>
+        <div class="flex items-center gap-2">
+          <span class="status-dot"></span>
+          <span class="font-mono text-sm sm:text-base font-bold text-ink">Terkirim 06:30 WIB</span>
+        </div>
+        <p class="font-mono text-[11px] text-muted mt-2">WhatsApp & Telegram Bot</p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN CONTENT -->
+<main class="py-12 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
+
+  <!-- TOP MOVERS: GAINERS & LOSERS (MEMANJANG KIRI KE KANAN DI ATAS RANGKUMAN TOPIK) -->
+  <section class="card-brutal p-6 sm:p-8 mb-10">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b-2 border-ink pb-4 mb-6 gap-2">
+      <div>
+        <span class="font-mono text-xs text-muted uppercase tracking-widest block">Market Movement Snapshot</span>
+        <h2 class="text-2xl font-bold text-ink">Top Movers Pasar Saham Hari Ini</h2>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="badge-brutal text-[11px] bg-white">[ TOP 5 IDX ]</span>
+        <span class="font-mono text-xs text-muted">Realtime Sesi Terakhir</span>
+      </div>
+    </div>
+
+    <!-- 2 Columns Grid: Gainers & Losers stretched horizontally -->
+    <div class="grid md:grid-cols-2 gap-6">
+      <!-- Top Gainers -->
+      <div class="border-2 border-ink p-5 bg-green-50 shadow-[3px_3px_0_0_#0A0A0A]">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-green-600 inline-block border border-ink"></span>
+            <span class="font-mono text-sm font-bold text-green-950 uppercase tracking-wide">▲ Top 5 Gainers</span>
+          </div>
+          <span class="font-mono text-[11px] text-green-800 font-semibold bg-green-200 border border-green-800 px-2 py-0.5">Bullish</span>
+        </div>
+        <div id="gainers-table" class="space-y-2.5 font-mono text-xs">
+          Memuat data gainers...
+        </div>
+      </div>
+
+      <!-- Top Losers -->
+      <div class="border-2 border-ink p-5 bg-red-50 shadow-[3px_3px_0_0_#0A0A0A]">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-3 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 bg-red-600 inline-block border border-ink"></span>
+            <span class="font-mono text-sm font-bold text-red-950 uppercase tracking-wide">▼ Top 5 Losers</span>
+          </div>
+          <span class="font-mono text-[11px] text-red-800 font-semibold bg-red-200 border border-red-800 px-2 py-0.5">Bearish</span>
+        </div>
+        <div id="losers-table" class="space-y-2.5 font-mono text-xs">
+          Memuat data losers...
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2-COLUMNS: TOPIC READER & INFOGRAPHIC CARD VIEWER -->
+  <div class="grid lg:grid-cols-12 gap-10 items-start">
+
+    <!-- Left (7 Cols): Topic Reader -->
+    <div class="lg:col-span-7">
+      <div class="card-brutal p-6 sm:p-8">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-4 mb-6">
+          <div>
+            <span class="font-mono text-xs text-muted uppercase tracking-widest block">Readable Content</span>
+            <h2 class="text-2xl font-bold text-ink">Rangkuman 9 Topik Pasar</h2>
+          </div>
+          <span class="badge-brutal text-[10px]">[ !topik ]</span>
+        </div>
+
+        <p class="text-sm text-muted mb-4">
+          Klik salah satu topik di bawah ini untuk membaca ringkasan pasar secara mendalam:
+        </p>
+
+        <!-- Topic Tabs Pills -->
+        <div class="flex flex-wrap gap-2 mb-6" id="topic-pills-container">
+          <button onclick="selectTodayTopic('ihsg')" data-topic="ihsg" class="today-pill active">
+            1. IHSG
+          </button>
+          <button onclick="selectTodayTopic('gainers')" data-topic="gainers" class="today-pill">
+            2. Gainers
+          </button>
+          <button onclick="selectTodayTopic('losers')" data-topic="losers" class="today-pill">
+            3. Losers
+          </button>
+          <button onclick="selectTodayTopic('sektor')" data-topic="sektor" class="today-pill">
+            4. Sektor
+          </button>
+          <button onclick="selectTodayTopic('asing')" data-topic="asing" class="today-pill">
+            5. Asing
+          </button>
+          <button onclick="selectTodayTopic('makro')" data-topic="makro" class="today-pill">
+            6. Makro
+          </button>
+          <button onclick="selectTodayTopic('ipo')" data-topic="ipo" class="today-pill">
+            7. IPO
+          </button>
+          <button onclick="selectTodayTopic('watchlist')" data-topic="watchlist" class="today-pill">
+            8. Watchlist
+          </button>
+          <button onclick="selectTodayTopic('berita')" data-topic="berita" class="today-pill">
+            9. Tips & Edu
+          </button>
+        </div>
+
+        <!-- Topic Reading Container -->
+        <article class="border-2 border-ink bg-gray-50 p-6 sm:p-7 min-h-[260px] shadow-[3px_3px_0_0_#0A0A0A]">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b-2 border-ink">
+            <h3 id="today-topic-title" class="font-bold text-base sm:text-lg tracking-wide text-ink font-mono uppercase">
+              📊 1. IHSG Composite & Sentimen Pasar
+            </h3>
+            <span class="font-mono text-[11px] text-muted">Sectors API + Gemini AI</span>
+          </div>
+
+          <div id="today-topic-body" class="text-base sm:text-lg text-ink leading-relaxed whitespace-pre-line font-sans font-medium">
+            Memuat data ringkasan pasar...
+          </div>
+        </article>
+
+        <!-- All Topics Summary Toggle -->
+        <div class="mt-6 pt-5 border-t-2 border-ink flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p class="text-xs text-muted font-mono">
+            Ingin membaca seluruh 9 topik sekaligus dalam 1 teks panjang?
+          </p>
+          <button onclick="showAllTopics()" class="btn-brutal btn-brutal-outline text-xs py-2 px-3 whitespace-nowrap">
+            <i class="fa-solid fa-list-check text-xs"></i> Tampilkan Semua Topik
+          </button>
+        </div>
+
+        <!-- All Topics Container -->
+        <div id="all-topics-container" class="hidden mt-6 border-2 border-ink p-6 bg-white space-y-6">
+          <div class="flex items-center justify-between border-b-2 border-ink pb-3">
+            <h4 class="font-bold text-base text-ink">Semua 9 Topik Hari Ini</h4>
+            <button onclick="hideAllTopics()" class="text-xs font-mono font-bold underline hover:text-red-600">Tutup</button>
+          </div>
+          <div id="all-topics-content" class="space-y-6 text-sm leading-relaxed"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right (5 Cols): Card Viewer -->
+    <div class="lg:col-span-5">
+      <div class="card-brutal p-6 sticky top-24">
+        <div class="flex items-center justify-between border-b-2 border-ink pb-4 mb-5">
+          <div>
+            <span class="font-mono text-xs text-muted uppercase tracking-widest block">Visual Card Viewer</span>
+            <h3 class="text-xl font-bold text-ink">Infografis Pasar Hari Ini</h3>
+          </div>
+          <span class="badge-brutal text-[10px]">[ !kartu ]</span>
+        </div>
+
+        <p class="text-xs text-muted mb-4">
+          Pilih salah satu dari 3 desain kartu infografis berkualitas tinggi:
+        </p>
+
+        <!-- Card Style Buttons -->
+        <div class="grid grid-cols-3 gap-2 mb-4">
+          <button onclick="switchTodayCard('1')" id="btn-card-v1" class="btn-brutal text-xs py-2 px-1 text-center justify-center font-mono">
+            Versi 1
+          </button>
+          <button onclick="switchTodayCard('2')" id="btn-card-v2" class="btn-brutal btn-brutal-outline text-xs py-2 px-1 text-center justify-center font-mono">
+            Versi 2
+          </button>
+          <button onclick="switchTodayCard('3')" id="btn-card-v3" class="btn-brutal btn-brutal-outline text-xs py-2 px-1 text-center justify-center font-mono">
+            Versi 3
+          </button>
+        </div>
+
+        <!-- High Resolution Card Image Preview -->
+        <div class="border-2 border-ink bg-slate-900 overflow-hidden relative group">
+          <img id="today-card-img" src="assets/card_v1.png" alt="Briefin Market Infographic Card"
+               class="w-full h-auto object-cover transition-transform duration-300 group-hover:scale-[1.02]" />
+          <div class="absolute bottom-2 right-2 bg-ink bg-opacity-80 border border-white px-2 py-1 text-white font-mono text-[10px]">
+            Klik kanan / tahan untuk unduh
+          </div>
+        </div>
+
+        <!-- Card Description & Download Link -->
+        <div class="mt-4 pt-3 border-t-2 border-ink flex items-center justify-between text-xs text-muted font-mono">
+          <span id="today-card-caption">Gaya 1: IHSG Pulse & Top 5 Movers</span>
+          <a id="today-card-download" href="assets/card_v1.png" download="briefin-market-card.png"
+             class="btn-brutal btn-brutal-outline text-[11px] py-1 px-2.5">
+            <i class="fa-solid fa-download text-[10px]"></i> Unduh PNG
+          </a>
+        </div>
+
+        <!-- Call to action bot subscription -->
+        <div class="mt-6 border-2 border-ink p-5 bg-ink text-white">
+          <h4 class="font-bold text-sm mb-1 text-white">Ingin terima kartu ini di WhatsApp?</h4>
+          <p class="text-xs text-gray-400 mb-4">
+            Daftarkan nomor Anda secara gratis. Bot akan otomatis mengirim brief & infografis setiap pagi hari bursa pukul 06:30 WIB.
+          </p>
+          <a href="index.html#hero-form" class="btn-brutal bg-white text-ink border-white w-full justify-center text-xs py-2 hover:bg-gray-100">
+            Daftar via WhatsApp <i class="fa-brands fa-whatsapp text-green-600 text-sm"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="bg-white section-divider py-8 px-4 sm:px-6 lg:px-8 mt-16">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center">
+        <a href="index.html" class="text-xl font-bold text-ink">briefin</a>
+        <span class="text-xl font-black text-ink">.</span>
+      </div>
+      <p class="font-mono text-xs text-muted mt-1">&#169; 2026 Briefin. Powered by Sectors Financial Engine API.</p>
+    </div>
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="font-mono text-xs text-muted hover:text-ink">Beranda</a>
+      <a href="index.html#topik-fitur" class="font-mono text-xs text-muted hover:text-ink">9 Topik</a>
+      <a href="index.html#gaya-kartu" class="font-mono text-xs text-muted hover:text-ink">Gaya Kartu</a>
+      <a href="index.html#perintah-bot" class="font-mono text-xs text-muted hover:text-ink">Bot Commands</a>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPT TODAY'S BRIEF LOGIC -->
+<script>
+  const TOPIC_TITLES = {
+    ihsg: '📊 1. IHSG Composite & Sentimen Pasar',
+    gainers: '🚀 2. Top Gainers Highlight',
+    losers: '🔻 3. Top Losers Highlight',
+    sektor: '📈 4. Performa Sektoral IDX',
+    asing: '🌐 5. Arus Dana Asing (Foreign Flow)',
+    makro: '🌍 6. Komoditas & Makro Global',
+    ipo: '📅 7. Aksi Korporasi & IPO',
+    watchlist: '🎯 8. Technical Watchlist Radar',
+    berita: '💡 9. Tips & Edukasi Trading'
+  };
+
+  let currentBriefData = null;
+  let activeTodayTopic = 'ihsg';
+  let activeTodayCard = '1';
+
+  const FALLBACK_BRIEF_DATA = {
+    date: new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }),
+    normalized: {
+      ihsg: { price: 7521.30, change: 32.50, percent_change: 0.43 },
+      market_cap: 12450000000000000,
+      gainers: [
+        { symbol: 'BBCA', price: 10625, percent_change: 1.67 },
+        { symbol: 'TLKM', price: 3780, percent_change: 1.89 },
+        { symbol: 'BRPT', price: 1180, percent_change: 4.42 },
+        { symbol: 'MEDC', price: 1340, percent_change: 3.47 },
+        { symbol: 'AMMN', price: 9850, percent_change: 2.60 }
+      ],
+      losers: [
+        { symbol: 'GOTO', price: 62, percent_change: -3.12 },
+        { symbol: 'ADRO', price: 2950, percent_change: -1.67 },
+        { symbol: 'ASII', price: 4890, percent_change: -1.21 },
+        { symbol: 'UNVR', price: 2140, percent_change: -2.28 },
+        { symbol: 'BUMI', price: 138, percent_change: -2.82 }
+      ]
+    },
+    summary: {
+      ihsg: '☀️ Selamat pagi investor! IHSG mempertahankan momentum penguatan di tengah sentimen pasar yang bergairah.\n\nIHSG: 7,521.30 (+32.50 / +0.43%) 📈\nSupport: 7,480 | Resist: 7,560',
+      gainers: '🚀 Top Gainers Highlight:\n• BBCA: Rp 10,625 (+1.67%) - Solid flow sektor perbankan\n• TLKM: Rp 3,780 (+1.89%) - Rebound telekomunikasi\n• BRPT: Rp 1,180 (+4.42%) - Katalis petrokimia & energi\n• MEDC: Rp 1,340 (+3.47%)\n• AMMN: Rp 9,850 (+2.60%)',
+      losers: '🔻 Top Losers Highlight:\n• GOTO: Rp 62 (-3.12%)\n• ADRO: Rp 2,950 (-1.67%)\n• ASII: Rp 4,890 (-1.21%)\n• UNVR: Rp 2,140 (-2.28%)\n• BUMI: Rp 138 (-2.82%)\nWaspada jika menembus area support kunci.',
+      sektor: '📊 Performa Sektoral IDX:\nSektor Energi (+1.42%) dan Teknologi (+2.15%) memimpin reli penguatan indeks, sementara Bahan Baku terkoreksi wajar.',
+      asing: '🌐 Arus Dana Asing (Net Foreign Flow):\nInvestor asing mencatatkan akumulasi Net Buy selektif +Rp 428.5 Miliar di pasar reguler, terutama saham big caps perbankan.',
+      makro: '🌍 Komoditas & Makro Global:\n• Brent Crude: $82.40/bbl (+0.65%)\n• Gold (XAU/USD): $2,645/oz (+1.12%)\n• USD/IDR: Rp 15,640 (Stabil terkendali)',
+      ipo: '📅 Aksi Korporasi & e-IPO:\nPerhatikan jadwal cum date dividen interim beberapa emiten pekan ini serta penjatahan saham IPO di Bursa Efek Indonesia.',
+      watchlist: '🎯 Technical Watchlist:\n• BBRI: Akumulasi di area support 5,100\n• MEDC: Katalis penguatan harga komoditas minyak\n• ASII: Rebound teknikal kuat di area 4,800',
+      berita: '💡 Tips Hari Ini:\nTetap disiplin dengan trading plan Anda. Batasi risiko modal dengan memasang stop loss rasional di setiap posisi baru.'
+    }
+  };
+
+  async function loadTodaysBrief() {
+    try {
+      const supabaseUrl = window.SUPABASE_URL || '';
+      const supabaseAnonKey = window.SUPABASE_ANON_KEY || '';
+
+      if (supabaseUrl && supabaseAnonKey && window.supabase) {
+        const client = window.supabase.createClient(supabaseUrl, supabaseAnonKey);
+        const { data, error } = await client
+          .from('daily_briefs')
+          .select('*')
+          .order('id', { ascending: false })
+          .limit(1);
+
+        if (!error && data && data.length > 0) {
+          const row = data[0];
+          currentBriefData = {
+            date: row.brief_date || 'Hari ini',
+            normalized: row.normalized || FALLBACK_BRIEF_DATA.normalized,
+            summary: row.summary || FALLBACK_BRIEF_DATA.summary
+          };
+          renderTodayData(currentBriefData);
+          return;
+        }
+      }
+
+      const resp = await fetch('assets/latest_brief.json');
+      if (resp.ok) {
+        currentBriefData = await resp.json();
+        renderTodayData(currentBriefData);
+        return;
+      }
+    } catch (e) {
+      console.warn('Fallback to local data:', e);
+    }
+
+    currentBriefData = FALLBACK_BRIEF_DATA;
+    renderTodayData(currentBriefData);
+  }
+
+  function renderTodayData(data) {
+    if (!data) return;
+
+    const ihsg = data.normalized?.ihsg || {};
+    const price = ihsg.price || 7521.30;
+    const chg = ihsg.change || 0;
+    const pct = ihsg.percent_change || 0;
+    const isPos = chg >= 0;
+
+    const priceEl = document.getElementById('market-ihsg-price');
+    const badgeEl = document.getElementById('market-ihsg-badge');
+    if (priceEl) priceEl.textContent = typeof price === 'number' ? price.toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : price;
+    if (badgeEl) {
+      const sign = isPos ? '+' : '';
+      badgeEl.textContent = `${isPos ? '▲' : '▼'} ${sign}${typeof chg === 'number' ? chg.toFixed(2) : chg} (${sign}${typeof pct === 'number' ? pct.toFixed(2) : pct}%)`;
+      badgeEl.className = `inline-block mt-2 font-mono text-xs font-bold ${isPos ? 'text-green-700 bg-green-100 border border-green-600' : 'text-red-700 bg-red-100 border border-red-600'} px-2 py-0.5`;
+    }
+
+    const mcap = data.normalized?.market_cap;
+    const mcapEl = document.getElementById('market-cap-val');
+    if (mcapEl && mcap) {
+      if (typeof mcap === 'number' && mcap > 1e12) {
+        mcapEl.textContent = `Rp ${(mcap / 1e12).toFixed(0)} T`;
+      } else {
+        mcapEl.textContent = String(mcap);
+      }
+    }
+
+    const gainers = data.normalized?.gainers || [];
+    if (gainers.length > 0) {
+      const g = gainers[0];
+      const gSym = document.getElementById('quick-gainer-sym');
+      const gPct = document.getElementById('quick-gainer-pct');
+      const gPrice = document.getElementById('quick-gainer-price');
+      if (gSym) gSym.textContent = (g.symbol || '').replace('.JK', '');
+      if (gPct) gPct.textContent = `+${g.percent_change || 0}%`;
+      if (gPrice) gPrice.textContent = `Rp ${(g.price || 0).toLocaleString('id-ID')} / lembar`;
+    }
+
+    const dateBadge = document.getElementById('brief-date-badge');
+    if (dateBadge) {
+      dateBadge.textContent = `📅 Sesi: ${data.date || 'Hari ini'}`;
+    }
+
+    renderMoversTables(data.normalized);
+    renderCurrentTopic();
+  }
+
+  function renderMoversTables(norm) {
+    const gainers = norm?.gainers || [];
+    const losers = norm?.losers || [];
+
+    const gContainer = document.getElementById('gainers-table');
+    const lContainer = document.getElementById('losers-table');
+
+    if (gContainer) {
+      if (gainers.length === 0) {
+        gContainer.innerHTML = '<p class="text-muted">Data gainers tidak tersedia.</p>';
+      } else {
+        gContainer.innerHTML = gainers.slice(0, 5).map((g, i) => `
+          <div class="flex items-center justify-between border-b border-green-200 pb-1">
+            <span class="font-bold text-ink">${i+1}. ${g.symbol.replace('.JK','')}</span>
+            <span class="text-muted">Rp ${(g.price||0).toLocaleString('id-ID')}</span>
+            <span class="font-bold text-green-700">+${g.percent_change}%</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    if (lContainer) {
+      if (losers.length === 0) {
+        lContainer.innerHTML = '<p class="text-muted">Data losers tidak tersedia.</p>';
+      } else {
+        lContainer.innerHTML = losers.slice(0, 5).map((l, i) => `
+          <div class="flex items-center justify-between border-b border-red-200 pb-1">
+            <span class="font-bold text-ink">${i+1}. ${l.symbol.replace('.JK','')}</span>
+            <span class="text-muted">Rp ${(l.price||0).toLocaleString('id-ID')}</span>
+            <span class="font-bold text-red-600">${l.percent_change}%</span>
+          </div>
+        `).join('');
+      }
+    }
+  }
+
+  function selectTodayTopic(topicKey) {
+    activeTodayTopic = topicKey;
+    document.querySelectorAll('#topic-pills-container .today-pill').forEach(btn => {
+      btn.classList.toggle('active', btn.getAttribute('data-topic') === topicKey);
+    });
+    renderCurrentTopic();
+  }
+
+  function renderCurrentTopic() {
+    const titleEl = document.getElementById('today-topic-title');
+    const bodyEl = document.getElementById('today-topic-body');
+    if (!titleEl || !bodyEl || !currentBriefData) return;
+
+    titleEl.textContent = TOPIC_TITLES[activeTodayTopic] || `Topik: ${activeTodayTopic.toUpperCase()}`;
+
+    const summary = currentBriefData.summary || {};
+    let content = summary[activeTodayTopic] || 'Tidak ada catatan spesifik untuk topik ini pada sesi hari ini.';
+
+    // Enhanced readable formatting
+    let formatted = content
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-ink bg-gray-200 px-1 py-0.5">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic text-gray-700">$1</em>')
+      .replace(/• /g, '<span class="text-ink font-bold mr-1.5">•</span>');
+
+    bodyEl.innerHTML = formatted;
+  }
+
+  function showAllTopics() {
+    const container = document.getElementById('all-topics-container');
+    const contentEl = document.getElementById('all-topics-content');
+    if (!container || !contentEl || !currentBriefData) return;
+
+    const summary = currentBriefData.summary || {};
+    const order = ['ihsg', 'gainers', 'losers', 'sektor', 'asing', 'makro', 'ipo', 'watchlist', 'berita'];
+
+    contentEl.innerHTML = order.map(k => {
+      const title = TOPIC_TITLES[k] || k.toUpperCase();
+      let raw = summary[k] || '-';
+      raw = raw.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+      return `
+        <div class="border-b border-gray-200 pb-4">
+          <h5 class="font-bold font-mono text-sm uppercase text-ink mb-1.5">${title}</h5>
+          <p class="whitespace-pre-line text-ink">${raw}</p>
+        </div>
+      `;
+    }).join('');
+
+    container.classList.remove('hidden');
+    container.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function hideAllTopics() {
+    const container = document.getElementById('all-topics-container');
+    if (container) container.classList.add('hidden');
+  }
+
+  function switchTodayCard(version) {
+    activeTodayCard = version;
+    const imgEl = document.getElementById('today-card-img');
+    const captionEl = document.getElementById('today-card-caption');
+    const downloadEl = document.getElementById('today-card-download');
+
+    ['1', '2', '3'].forEach(v => {
+      const btn = document.getElementById(`btn-card-v${v}`);
+      if (btn) {
+        if (v === version) {
+          btn.classList.remove('btn-brutal-outline');
+        } else {
+          btn.classList.add('btn-brutal-outline');
+        }
+      }
+    });
+
+    const cardMap = {
+      '1': {
+        src: 'assets/card_v1.png',
+        caption: 'Gaya 1: IHSG Pulse & Top 5 Movers',
+        filename: 'briefin-card-v1-movers.png'
+      },
+      '2': {
+        src: 'assets/card_v2.png',
+        caption: 'Gaya 2: IDX Sektor & Macro Radar',
+        filename: 'briefin-card-v2-macro.png'
+      },
+      '3': {
+        src: 'assets/card_v3.png',
+        caption: 'Gaya 3: Executive All-in-One Dashboard',
+        filename: 'briefin-card-v3-executive.png'
+      }
+    };
+
+    const target = cardMap[version] || cardMap['1'];
+    if (imgEl) imgEl.src = target.src;
+    if (captionEl) captionEl.textContent = target.caption;
+    if (downloadEl) {
+      downloadEl.href = target.src;
+      downloadEl.download = target.filename;
+    }
+  }
+
+  function copyBriefText() {
+    if (!currentBriefData) return;
+    const summary = currentBriefData.summary || {};
+    let fullText = `📊 BRIEFIN • TODAY'S MARKET BRIEF\n\n`;
+    const order = ['ihsg', 'gainers', 'losers', 'sektor', 'asing', 'makro', 'ipo', 'watchlist', 'berita'];
+    order.forEach(k => {
+      if (summary[k]) fullText += `${summary[k]}\n\n`;
+    });
+    fullText += `🌐 Baca selengkapnya & infografis: ${window.location.href}`;
+
+    navigator.clipboard.writeText(fullText).then(() => {
+      const copyBtn = document.getElementById('btn-copy-brief');
+      if (copyBtn) {
+        const orig = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fa-solid fa-check text-xs"></i> Tersalin!';
+        setTimeout(() => { copyBtn.innerHTML = orig; }, 2000);
+      }
+    }).catch(err => {
+      console.warn('Copy failed:', err);
+    });
+  }
+
+  function refreshTodaysBrief() {
+    loadTodaysBrief();
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    loadTodaysBrief();
+  });
+</script>
+
+</body>
+</html>
